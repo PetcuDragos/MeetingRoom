@@ -22,4 +22,9 @@ public class RoomRepository {
     public List<Room> getRooms() {
         return this.roomList;
     }
+
+    public boolean updateRoom(Long roomId, Room updatedRoom) {
+        roomList.removeIf(room -> room.getId().equals(roomId));
+        return roomList.add(updatedRoom);
+    }
 }

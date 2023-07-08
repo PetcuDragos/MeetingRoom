@@ -1,15 +1,17 @@
 package ro.dragos.model;
 
+import java.util.List;
+
 public class Room {
 
     private final Long id;
     private final String name;
-    private final Integer numberOfSeats;
+    private final List<Seat> seats;
 
-    public Room(Long id, String name, Integer numberOfSeats) {
+    public Room(Long id, String name, List<Seat> seats) {
         this.id = id;
         this.name = name;
-        this.numberOfSeats = numberOfSeats;
+        this.seats = seats;
     }
 
     public Long getId() {
@@ -20,7 +22,7 @@ public class Room {
         return name;
     }
 
-    public Integer getNumberOfSeats() {
-        return numberOfSeats;
+    public List<Seat> getSeats() {
+        return seats;
     }
 }
