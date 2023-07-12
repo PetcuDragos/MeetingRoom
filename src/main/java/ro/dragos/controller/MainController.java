@@ -34,4 +34,10 @@ public class MainController {
         return this.roomRepository.updateRoom(roomId, RoomConverter.convertRoomDtoToRoom(roomDto));
     }
 
+    @DeleteMapping(path = "/room/{id}")
+    public boolean deleteRoom(@PathVariable("id") Long roomId) {
+        return this.roomRepository.deleteRoom(roomId);
+    }
+
+
 }

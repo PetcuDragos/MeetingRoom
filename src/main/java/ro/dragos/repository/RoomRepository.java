@@ -27,4 +27,8 @@ public class RoomRepository {
         roomList.removeIf(room -> room.getId().equals(roomId));
         return roomList.add(updatedRoom);
     }
+
+    public boolean deleteRoom(Long roomId) {
+        return roomList.removeIf(room -> room.getId().equals(roomId));
+    }
 }

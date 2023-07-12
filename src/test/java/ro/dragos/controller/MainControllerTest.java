@@ -78,6 +78,22 @@ public class MainControllerTest {
                 .andExpect(content().string(containsString("true")));
     }
 
+    @Test
+    public void deleteRoomTest() throws Exception {
+
+        when(repository.deleteRoom(1L)).thenReturn(true);
+        when(repository.deleteRoom(Mockito.longThat((longValue)-> longValue != 1L))).thenReturn(false);
+
+        mockMvc.perform(delete("/room/{id}", 1))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("true")));
+
+
+        mockMvc.perform(delete("/room/{id}", 2))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("false")));
+    }
+
     public String toJson(Object object) {
         try {
             return new ObjectMapper().writeValueAsString(object);
