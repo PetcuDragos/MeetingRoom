@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ro.dragos.convertors.RoomConverter;
 import ro.dragos.dto.RoomDto;
+import ro.dragos.dto.SeatDto;
 import ro.dragos.repository.RoomRepository;
 
 import java.util.List;
@@ -37,6 +38,13 @@ public class MainController {
     @DeleteMapping(path = "/room/{id}")
     public boolean deleteRoom(@PathVariable("id") Long roomId) {
         return this.roomRepository.deleteRoom(roomId);
+    }
+
+    @GetMapping(path = "/room/{id}/seats/available")
+    public List<SeatDto> getAvailableSeatsForRoom(@PathVariable("id") Long roomId) {
+        return this.roomRepository.getAvailableSeatsForRoom(roomId).stream()
+                .map(seat -> new SeatDto(seat.getId(), seat.getAvailable()))
+                .toList();
     }
 
 

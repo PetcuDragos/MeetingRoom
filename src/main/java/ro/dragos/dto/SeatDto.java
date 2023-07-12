@@ -1,11 +1,11 @@
-package ro.dragos.model;
+package ro.dragos.dto;
 
-public class Seat {
+public class SeatDto {
 
-    private final Long id;
-    private final Boolean available;
+    private Long id;
+    private Boolean available;
 
-    public Seat(Long id, Boolean available) {
+    public SeatDto(Long id, Boolean available) {
         this.id = id;
         this.available = available;
     }
