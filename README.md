@@ -17,3 +17,11 @@ Create tests for the controller (Mockito and JUnit) [Solved in R-0.0.4]
 Add delete functionality for a room. [Solved in R-0.0.5]
 
 Create a function that returns all the available seats for a room. [Solved in R-0.0.6]
+
+
+Updates:
+
+[U-0.0.6.1] 
+- In MainController, changed components injection to constructor injection
+- In MainControllerTest, changed the name of the components to be more suggestive
+- In SeatDto, changed the modifiers of fields
