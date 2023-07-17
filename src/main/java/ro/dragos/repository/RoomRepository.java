@@ -2,11 +2,9 @@ package ro.dragos.repository;
 
 import org.springframework.stereotype.Repository;
 import ro.dragos.model.Room;
-import ro.dragos.model.Seat;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class RoomRepository {
@@ -32,11 +30,5 @@ public class RoomRepository {
 
     public boolean deleteRoom(Long roomId) {
         return roomList.removeIf(room -> room.getId().equals(roomId));
-    }
-
-    public List<Seat> getAvailableSeatsForRoom(Long roomId) {
-        Optional<Room> roomFound = this.roomList.stream().filter(room -> room.getId().equals(roomId)).findAny();
-        return roomFound.map(room -> room.getSeats().stream().filter(Seat::getAvailable).toList())
-                .orElseGet(ArrayList::new);
     }
 }

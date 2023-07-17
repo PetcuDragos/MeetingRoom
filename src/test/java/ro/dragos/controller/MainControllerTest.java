@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ro.dragos.dto.RoomDto;
 import ro.dragos.model.Room;
 import ro.dragos.model.Seat;
-import ro.dragos.repository.RoomRepository;
+import ro.dragos.service.RoomService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class MainControllerTest {
     private final MockMvc mockMvc;
 
     @MockBean
-    private RoomRepository roomRepository;
+    private RoomService roomService;
 
     public MainControllerTest(@Autowired MockMvc mockMvc) {
         this.mockMvc = mockMvc;
@@ -46,7 +46,7 @@ public class MainControllerTest {
     @Test
     public void getRoomsTest() throws Exception {
 
-        when(roomRepository.getRooms()).thenReturn(List.of(new Room(1L, "Room1", new ArrayList<>())));
+        when(roomService.getRooms()).thenReturn(List.of(new Room(1L, "Room1", new ArrayList<>())));
 
         mockMvc.perform(get("/room"))
                 .andExpect(status().isOk())
@@ -59,7 +59,7 @@ public class MainControllerTest {
 
         RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
 
-        when(roomRepository.addRoom(Mockito.any(Room.class))).thenReturn(true);
+        when(roomService.addRoom(Mockito.any(Room.class))).thenReturn(true);
 
         mockMvc.perform(post("/room")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -73,7 +73,7 @@ public class MainControllerTest {
 
         RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
 
-        when(roomRepository.updateRoom(Mockito.any(Long.class), Mockito.any(Room.class))).thenReturn(true);
+        when(roomService.updateRoom(Mockito.any(Long.class), Mockito.any(Room.class))).thenReturn(true);
 
         mockMvc.perform(put("/room/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -85,8 +85,8 @@ public class MainControllerTest {
     @Test
     public void deleteRoomTest() throws Exception {
 
-        when(roomRepository.deleteRoom(1L)).thenReturn(true);
-        when(roomRepository.deleteRoom(Mockito.longThat((longValue) -> longValue != 1L))).thenReturn(false);
+        when(roomService.deleteRoom(1L)).thenReturn(true);
+        when(roomService.deleteRoom(Mockito.longThat((longValue) -> longValue != 1L))).thenReturn(false);
 
         mockMvc.perform(delete("/room/{id}", 1))
                 .andExpect(status().isOk())
@@ -101,10 +101,10 @@ public class MainControllerTest {
     @Test
     public void getAvailableSeatsForRoomTest() throws Exception {
 
-        when(roomRepository.getAvailableSeatsForRoom(1L))
+        when(roomService.getAvailableSeatsForRoom(1L))
                 .thenReturn(List.of(new Seat(1L, true), new Seat(2L, true)));
 
-        when(roomRepository.getAvailableSeatsForRoom(Mockito.longThat(longValue -> !longValue.equals(1L))))
+        when(roomService.getAvailableSeatsForRoom(Mockito.longThat(longValue -> !longValue.equals(1L))))
                 .thenReturn(new ArrayList<>());
 
         mockMvc.perform(get("/room/{id}/seats/available", 1L))

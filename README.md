@@ -18,6 +18,11 @@ Add delete functionality for a room. [Solved in R-0.0.5]
 
 Create a function that returns all the available seats for a room. [Solved in R-0.0.6]
 
+Create a service layer between controller and repository layers. [Solved in R-0.0.7]
+
+Create a separate repository for Seat object. 
+
+Create integration tests for controller.
 
 Updates:
 
