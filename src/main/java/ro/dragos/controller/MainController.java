@@ -1,6 +1,5 @@
 package ro.dragos.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ro.dragos.convertors.RoomConverter;
 import ro.dragos.dto.RoomDto;
@@ -12,8 +11,11 @@ import java.util.List;
 @RestController
 public class MainController {
 
-    @Autowired
-    private RoomRepository roomRepository;
+    private final RoomRepository roomRepository;
+
+    public MainController(RoomRepository roomRepository) {
+        this.roomRepository = roomRepository;
+    }
 
     @GetMapping(path = "/start")
     public String getHelloMessage() {

@@ -2,8 +2,8 @@ package ro.dragos.dto;
 
 public class SeatDto {
 
-    private Long id;
-    private Boolean available;
+    private final Long id;
+    private final Boolean available;
 
     public SeatDto(Long id, Boolean available) {
         this.id = id;
