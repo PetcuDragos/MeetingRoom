@@ -5,9 +5,12 @@ public class SeatDto {
     private final Long id;
     private final Boolean available;
 
-    public SeatDto(Long id, Boolean available) {
+    private final Long roomId;
+
+    public SeatDto(Long id, Boolean available, Long roomId) {
         this.id = id;
         this.available = available;
+        this.roomId = roomId;
     }
 
     public Long getId() {
@@ -16,5 +19,9 @@ public class SeatDto {
 
     public Boolean getAvailable() {
         return available;
+    }
+
+    public Long getRoomId() {
+        return roomId;
     }
 }

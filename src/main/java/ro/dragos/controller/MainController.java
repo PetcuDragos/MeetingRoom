@@ -2,6 +2,7 @@ package ro.dragos.controller;
 
 import org.springframework.web.bind.annotation.*;
 import ro.dragos.convertors.RoomConverter;
+import ro.dragos.convertors.SeatConverter;
 import ro.dragos.dto.RoomDto;
 import ro.dragos.dto.SeatDto;
 import ro.dragos.service.RoomService;
@@ -45,7 +46,7 @@ public class MainController {
     @GetMapping(path = "/room/{id}/seats/available")
     public List<SeatDto> getAvailableSeatsForRoom(@PathVariable("id") Long roomId) {
         return this.roomService.getAvailableSeatsForRoom(roomId).stream()
-                .map(seat -> new SeatDto(seat.getId(), seat.getAvailable()))
+                .map(SeatConverter::convertSeatToSeatDto)
                 .toList();
     }
 
