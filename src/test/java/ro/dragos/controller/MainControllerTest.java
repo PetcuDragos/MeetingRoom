@@ -102,7 +102,7 @@ public class MainControllerTest {
     public void getAvailableSeatsForRoomTest() throws Exception {
 
         when(roomService.getAvailableSeatsForRoom(1L))
-                .thenReturn(List.of(new Seat(1L, true), new Seat(2L, true)));
+                .thenReturn(List.of(new Seat(1L, true,1L), new Seat(2L, true,1L)));
 
         when(roomService.getAvailableSeatsForRoom(Mockito.longThat(longValue -> !longValue.equals(1L))))
                 .thenReturn(new ArrayList<>());

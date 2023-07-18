@@ -31,4 +31,12 @@ public class RoomRepository {
     public boolean deleteRoom(Long roomId) {
         return roomList.removeIf(room -> room.getId().equals(roomId));
     }
+
+    /**
+     * @param roomId - the id of the searched room
+     * @return  the room if found, null otherwise
+     */
+    public Room getRoomById(Long roomId) {
+        return roomList.stream().filter(room -> room.getId().equals(roomId)).findAny().orElse(null);
+    }
 }

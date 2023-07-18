@@ -20,7 +20,7 @@ Create a function that returns all the available seats for a room. [Solved in R-
 
 Create a service layer between controller and repository layers. [Solved in R-0.0.7]
 
-Create a separate repository for Seat object. 
+Create a separate repository for Seat object. [Solved in R-0.0.8]
 
 Create integration tests for controller.
 
