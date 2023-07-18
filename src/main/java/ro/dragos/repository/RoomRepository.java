@@ -1,42 +1,9 @@
 package ro.dragos.repository;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 import ro.dragos.model.Room;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Repository
-public class RoomRepository {
-
-    private final List<Room> roomList;
-
-    public RoomRepository() {
-        this.roomList = new ArrayList<>();
-    }
-
-    public boolean addRoom(Room room) {
-        return this.roomList.add(room);
-    }
-
-    public List<Room> getRooms() {
-        return this.roomList;
-    }
-
-    public boolean updateRoom(Long roomId, Room updatedRoom) {
-        roomList.removeIf(room -> room.getId().equals(roomId));
-        return roomList.add(updatedRoom);
-    }
-
-    public boolean deleteRoom(Long roomId) {
-        return roomList.removeIf(room -> room.getId().equals(roomId));
-    }
-
-    /**
-     * @param roomId - the id of the searched room
-     * @return  the room if found, null otherwise
-     */
-    public Room getRoomById(Long roomId) {
-        return roomList.stream().filter(room -> room.getId().equals(roomId)).findAny().orElse(null);
-    }
+@NoRepositoryBean
+public interface RoomRepository extends CrudRepository<Room, Long> {
 }
