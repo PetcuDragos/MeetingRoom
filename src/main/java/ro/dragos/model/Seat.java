@@ -1,20 +1,15 @@
 package ro.dragos.model;
 
-public class Seat {
+public class Seat extends BaseModel<Long> {
 
-    private final Long id;
     private final Boolean available;
 
     private final Long roomId;
 
     public Seat(Long id, Boolean available, Long roomId) {
-        this.id = id;
+        super(id);
         this.available = available;
         this.roomId = roomId;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public Boolean getAvailable() {

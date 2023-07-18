@@ -30,3 +30,6 @@ Updates:
 - In MainController, changed components injection to constructor injection
 - In MainControllerTest, changed the name of the components to be more suggestive
 - In SeatDto, changed the modifiers of fields
+
+[R-0.0.9]
+- Switched to a new API for the repositories. Used springframework CrudRepository interface.

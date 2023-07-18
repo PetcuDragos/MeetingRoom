@@ -1,82 +1,81 @@
 package ro.dragos.service;
 
+import org.springframework.stereotype.Service;
 import ro.dragos.model.Room;
 import ro.dragos.model.Seat;
 import ro.dragos.repository.RoomRepository;
+import ro.dragos.repository.RoomRepositoryInMemory;
 import ro.dragos.repository.SeatRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class RoomService {
 
     private final RoomRepository roomRepository;
     private final SeatRepository seatRepository;
 
-    public RoomService(RoomRepository roomRepository, SeatRepository seatRepository) {
+    public RoomService(RoomRepositoryInMemory roomRepository, SeatRepository seatRepository) {
         this.roomRepository = roomRepository;
         this.seatRepository = seatRepository;
     }
 
     public List<Room> getRooms() {
-        return roomRepository.getRooms();
+        return (List<Room>) roomRepository.findAll();
     }
 
     public boolean addRoom(Room room) {
-        boolean roomWasAdded = roomRepository.addRoom(room);
-        if (roomWasAdded) {
-            boolean seatFailedToAdd = room.getSeats().stream().anyMatch(seat -> !seatRepository.addSeat(seat));
-            if (seatFailedToAdd) {
-                roomRepository.deleteRoom(room.getId());
-                room.getSeats().forEach(seat -> seatRepository.deleteSeat(seat.getId()));
-            }
-            return !seatFailedToAdd;
+        try {
+            roomRepository.save(room);
+            room.getSeats().forEach(seatRepository::save);
+            return true;
+        } catch (Exception e) {
+            roomRepository.delete(room);
+            room.getSeats().forEach(seatRepository::delete);
+            return false;
         }
-        return false;
     }
 
     public boolean updateRoom(Long roomId, Room room) {
-        Room roomBeforeUpdate = roomRepository.getRoomById(roomId);
+        Optional<Room> roomBeforeUpdate = roomRepository.findById(roomId);
 
-        if (roomBeforeUpdate == null) {
+        if (roomBeforeUpdate.isEmpty()) {
             return false;
         }
 
-        List<Seat> oldSeats = roomBeforeUpdate.getSeats();
+        Room oldRoom = roomBeforeUpdate.get();
 
-        boolean roomWasUpdated = roomRepository.updateRoom(roomId, room);
-
-        if (roomWasUpdated) {
-            room.getSeats().stream().filter(seat -> !oldSeats.contains(seat)).forEach(seatRepository::addSeat);
-            oldSeats.stream().filter(seat -> !room.getSeats().contains(seat))
-                    .forEach(seat -> seatRepository.deleteSeat(seat.getId()));
+        try {
+            roomRepository.save(room);
+            room.getSeats().forEach(seatRepository::save);
+            oldRoom.getSeats().stream()
+                    .filter(oldSeat -> room.getSeats().stream().noneMatch(seat -> seat.getId().equals(oldSeat.getId())))
+                    .forEach(seatRepository::delete);
+            return true;
+        } catch (Exception e) {
+            roomRepository.save(oldRoom);
+            oldRoom.getSeats().forEach(seatRepository::save);
+            room.getSeats().stream()
+                    .filter(seat -> oldRoom.getSeats().stream().noneMatch(oldSeat -> oldSeat.getId().equals(seat.getId())))
+                    .forEach(seatRepository::delete);
+            return false;
         }
-
-        return roomWasUpdated;
     }
 
     public boolean deleteRoom(Long roomId) {
-        Room roomBeforeDelete = roomRepository.getRoomById(roomId);
-
-        if (roomBeforeDelete == null) {
+        try {
+            roomRepository.deleteById(roomId);
+            return true;
+        } catch (Exception e) {
             return false;
         }
-
-        List<Seat> oldSeats = roomBeforeDelete.getSeats();
-
-        boolean roomWasDeleted = roomRepository.deleteRoom(roomId);
-
-        if (roomWasDeleted) {
-            oldSeats.forEach(seat -> seatRepository.deleteSeat(seat.getId()));
-        }
-
-        return roomWasDeleted;
     }
 
 
     public List<Seat> getAvailableSeatsForRoom(Long roomId) {
-        Optional<Room> roomFound = roomRepository.getRooms().stream().filter(room -> room.getId().equals(roomId)).findAny();
+        Optional<Room> roomFound = roomRepository.findById(roomId);
         return roomFound.map(room -> room.getSeats().stream().filter(Seat::getAvailable).toList())
                 .orElseGet(ArrayList::new);
     }
