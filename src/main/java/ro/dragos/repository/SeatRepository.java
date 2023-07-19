@@ -1,9 +1,9 @@
 package ro.dragos.repository;
 
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import ro.dragos.model.Seat;
 
-@NoRepositoryBean
-public interface SeatRepository extends CrudRepository<Seat, Long> {
+@Repository
+public interface SeatRepository extends JpaRepository<Seat, Long> {
 }

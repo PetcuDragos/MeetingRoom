@@ -1,24 +1,23 @@
 package ro.dragos.model;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
-public class Room extends BaseModel<Long> {
+@Entity
+@Table(name = "rooms")
+@AllArgsConstructor
+@Getter
+@NoArgsConstructor
+public class Room {
 
+    @Id
+    private Long id;
+    private String name;
 
-    private final String name;
-    private final List<Seat> seats;
-
-    public Room(Long id, String name, List<Seat> seats) {
-        super(id);
-        this.name = name;
-        this.seats = seats;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public List<Seat> getSeats() {
-        return seats;
-    }
+    @OneToMany(mappedBy = "room", fetch = FetchType.EAGER)
+    private List<Seat> seats;
 }

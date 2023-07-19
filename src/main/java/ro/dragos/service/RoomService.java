@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import ro.dragos.model.Room;
 import ro.dragos.model.Seat;
 import ro.dragos.repository.RoomRepository;
-import ro.dragos.repository.RoomRepositoryInMemory;
 import ro.dragos.repository.SeatRepository;
 
 import java.util.ArrayList;
@@ -17,13 +16,13 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final SeatRepository seatRepository;
 
-    public RoomService(RoomRepositoryInMemory roomRepository, SeatRepository seatRepository) {
+    public RoomService(RoomRepository roomRepository, SeatRepository seatRepository) {
         this.roomRepository = roomRepository;
         this.seatRepository = seatRepository;
     }
 
     public List<Room> getRooms() {
-        return (List<Room>) roomRepository.findAll();
+        return roomRepository.findAll();
     }
 
     public boolean addRoom(Room room) {

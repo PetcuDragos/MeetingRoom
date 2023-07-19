@@ -6,6 +6,6 @@ import ro.dragos.model.Seat;
 public class SeatConverter {
 
     public static SeatDto convertSeatToSeatDto(Seat seat) {
-        return new SeatDto(seat.getId(), seat.getAvailable(), seat.getRoomId());
+        return new SeatDto(seat.getId(), seat.getAvailable(), seat.getRoom().getId());
     }
 }

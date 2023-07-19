@@ -1,22 +1,22 @@
 package ro.dragos.model;
 
-public class Seat extends BaseModel<Long> {
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-    private final Boolean available;
+@Entity
+@Table(name = "seats")
+@AllArgsConstructor
+@Getter
+@NoArgsConstructor
+public class Seat {
 
-    private final Long roomId;
+    @Id
+    private Long id;
+    private Boolean available;
 
-    public Seat(Long id, Boolean available, Long roomId) {
-        super(id);
-        this.available = available;
-        this.roomId = roomId;
-    }
-
-    public Boolean getAvailable() {
-        return available;
-    }
-
-    public Long getRoomId() {
-        return roomId;
-    }
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
 }
