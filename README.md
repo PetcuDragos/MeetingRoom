@@ -22,7 +22,7 @@ Create a service layer between controller and repository layers. [Solved in R-0.
 
 Create a separate repository for Seat object. [Solved in R-0.0.8]
 
-Create integration tests for controller.
+Create integration tests for service. [Solved in R-0.0.10]
 
 Updates:
 

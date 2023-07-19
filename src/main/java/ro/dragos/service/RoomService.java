@@ -27,6 +27,15 @@ public class RoomService {
     }
 
     public boolean addRoom(Room room) {
+        if (room == null) {
+            throw new IllegalArgumentException("Room was null");
+        }
+
+        Optional<Room> roomWithSameId = roomRepository.findById(room.getId());
+        if (roomWithSameId.isPresent()) {
+            return false;
+        }
+
         try {
             roomRepository.save(room);
             room.getSeats().forEach(seatRepository::save);
@@ -34,11 +43,15 @@ public class RoomService {
         } catch (Exception e) {
             roomRepository.delete(room);
             room.getSeats().forEach(seatRepository::delete);
-            return false;
+            throw e;
         }
     }
 
     public boolean updateRoom(Long roomId, Room room) {
+        if (roomId == null || room == null) {
+            throw new IllegalArgumentException("RoomId or room were null");
+        }
+
         Optional<Room> roomBeforeUpdate = roomRepository.findById(roomId);
 
         if (roomBeforeUpdate.isEmpty()) {
@@ -65,6 +78,9 @@ public class RoomService {
     }
 
     public boolean deleteRoom(Long roomId) {
+        if (roomId == null) {
+            throw new IllegalArgumentException("roomId was null");
+        }
         try {
             roomRepository.deleteById(roomId);
             return true;
