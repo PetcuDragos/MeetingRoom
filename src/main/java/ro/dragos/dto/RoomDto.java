@@ -4,7 +4,7 @@ import java.util.List;
 
 public class RoomDto {
 
-    private final Long id;
+    private Long id;
     private final String name;
     private final List<SeatDto> seats;
 
@@ -24,5 +24,9 @@ public class RoomDto {
 
     public List<SeatDto> getSeats() {
         return seats;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
