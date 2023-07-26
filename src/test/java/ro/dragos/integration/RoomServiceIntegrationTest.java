@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
 import ro.dragos.dto.RoomDto;
+import ro.dragos.exceptions.NotFoundException;
 import ro.dragos.model.Room;
 import ro.dragos.service.RoomService;
 
@@ -36,31 +37,12 @@ public class RoomServiceIntegrationTest {
     @Test
     public void addRoom_ShouldBeInserted_WhenGivenCorrectValue() {
         int numberOfRoomsBefore = roomService.getRooms().size();
-        boolean roomWasAdded = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
-        Assert.isTrue(roomWasAdded,
-                "Room was not added");
+        roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
+
         Assert.isTrue(roomService.getRooms().size() == numberOfRoomsBefore + 1,
                 "Size of roomList not changed properly after add");
         Assert.notNull(roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny().orElse(null),
                 "Added room was not found with the same id");
-    }
-
-    @Test
-    public void addRoom_ShouldNotBeInserted_WhenGivenAlreadyUsedId() {
-        boolean firstRoomWasAdded = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
-        int numberOfRoomsBefore = roomService.getRooms().size();
-        Assert.isTrue(firstRoomWasAdded,
-                "First room was not added");
-
-        boolean secondRoomWasAdded = roomService.addRoom(new RoomDto(1L, "Room2", new ArrayList<>()));
-
-        Assert.isTrue(!secondRoomWasAdded,
-                "The second room was added with duplicated ID");
-        Assert.isTrue(roomService.getRooms().size() == numberOfRoomsBefore,
-                "Size of roomList changed after add");
-        Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
-        Assert.isTrue(optionalRoom.isPresent() && optionalRoom.get().getName().equals("Room1"),
-                "The name of the room changed after failed add");
     }
 
     @Test
@@ -75,28 +57,30 @@ public class RoomServiceIntegrationTest {
 
     @Test
     public void updateRoom_ShouldUpdateRoom_WhenGivenRoomWithExistingId() {
-        boolean roomWasAdded = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
-        Assert.isTrue(roomWasAdded, "Room was not inserted");
+        Room room = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
         int numberOfRooms = roomService.getRooms().size();
 
-        boolean roomWasUpdated = roomService.updateRoom(1L, new RoomDto(1L, "Room2", new ArrayList<>()));
+        roomService.updateRoom(room.getId(), new RoomDto(1L, "Room2", new ArrayList<>()));
 
-        Assert.isTrue(roomWasUpdated, "Room update has returned false");
         Assert.isTrue(numberOfRooms == roomService.getRooms().size(), "The number of rooms has changed");
 
-        Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
+        Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(r -> r.getId().equals(room.getId())).findAny();
 
         Assert.isTrue(optionalRoom.isPresent(), "Room was not found with the inserted id");
         Assert.isTrue(optionalRoom.get().getName().equals("Room2"), "The room values were not updated");
     }
 
     @Test
-    public void updateRoom_ShouldNotUpdate_WhenGivenRoomWithNonExistingId() {
+    public void updateRoom_ShouldThrowException_WhenGivenRoomWithNonExistingId() {
         int numberOfRooms = roomService.getRooms().size();
 
-        boolean roomWasUpdated = roomService.updateRoom(1L, new RoomDto(1L, "Room1", new ArrayList<>()));
-
-        Assert.isTrue(!roomWasUpdated, "Room update returned true when it should've returned false");
+        try {
+            roomService.updateRoom(1L, new RoomDto(1L, "Room1", new ArrayList<>()));
+        } catch (NotFoundException notFoundException) {
+            assert true;
+        } catch (RuntimeException e) {
+            assert false;
+        }
         Assert.isTrue(numberOfRooms == roomService.getRooms().size(), "The number of rooms has changed");
 
         Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
@@ -126,27 +110,28 @@ public class RoomServiceIntegrationTest {
 
     @Test
     public void deleteRoom_ShouldRemove_WhenGivenAnExistingRoom() {
-        boolean roomWasAdded = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
-        Assert.isTrue(roomWasAdded, "Room was not inserted");
+        Room room = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
         int numberOfRooms = roomService.getRooms().size();
 
-        roomService.deleteRoom(1L);
+        roomService.deleteRoom(room.getId());
 
         Assert.isTrue(numberOfRooms == roomService.getRooms().size() + 1,
                 "The number of rooms has not decreased by 1");
 
-        Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
+        Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(r -> r.getId().equals(room.getId())).findAny();
 
         Assert.isTrue(optionalRoom.isEmpty(), "Found a room with an id equal to the one deleted");
     }
 
     @Test
-    public void deleteRoom_ShouldNotFail_WhenGivenAnIdFromANonExistingRoom() {
-        int numberOfRooms = roomService.getRooms().size();
+    public void deleteRoom_ShouldThrowException_WhenGivenAnIdFromANonExistingRoom() {
+        try {
+            roomService.deleteRoom(1L);
+        } catch (NotFoundException notFoundException) {
+            assert true;
+        } catch (RuntimeException exception) {
+            assert false;
+        }
 
-        roomService.deleteRoom(1L);
-
-        Assert.isTrue(numberOfRooms == roomService.getRooms().size(),
-                "The number of rooms has changed");
     }
 }

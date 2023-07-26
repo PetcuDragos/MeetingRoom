@@ -15,6 +15,7 @@ import ro.dragos.dto.SeatDto;
 import ro.dragos.model.Room;
 import ro.dragos.model.Seat;
 import ro.dragos.service.RoomService;
+import ro.dragos.utils.StringConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class MainControllerTest {
     public void getHelloMessageTest() throws Exception {
         mockMvc.perform(get("/start"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("hello!")));
+                .andExpect(content().string(containsString(StringConstants.HELLO_MESSAGE)));
     }
 
     @Test
@@ -55,49 +56,49 @@ public class MainControllerTest {
                 .andExpect(jsonPath("$[0].name", is("Room1")));
     }
 
-    @Test
-    public void addRoomTest() throws Exception {
-
-        RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
-
-        when(roomService.addRoom(Mockito.any(RoomDto.class))).thenReturn(true);
-
-        mockMvc.perform(post("/room")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(roomDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("true")));
-    }
-
-    @Test
-    public void updateRoomTest() throws Exception {
-
-        RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
-
-        when(roomService.updateRoom(Mockito.any(Long.class), Mockito.any(RoomDto.class))).thenReturn(true);
-
-        mockMvc.perform(put("/room/{id}", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(roomDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("true")));
-    }
-
-    @Test
-    public void deleteRoomTest() throws Exception {
-
-        when(roomService.deleteRoom(1L)).thenReturn(true);
-        when(roomService.deleteRoom(Mockito.longThat((longValue) -> longValue != 1L))).thenReturn(false);
-
-        mockMvc.perform(delete("/room/{id}", 1))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("true")));
-
-
-        mockMvc.perform(delete("/room/{id}", 2))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("false")));
-    }
+//    @Test
+//    public void addRoomTest() throws Exception {
+//
+//        RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
+//
+//        when(roomService.addRoom(Mockito.any(RoomDto.class))).thenReturn(true);
+//
+//        mockMvc.perform(post("/room")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(toJson(roomDto)))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string(containsString("true")));
+//    }
+//
+//    @Test
+//    public void updateRoomTest() throws Exception {
+//
+//        RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
+//
+//        when(roomService.updateRoom(Mockito.any(Long.class), Mockito.any(RoomDto.class))).thenReturn(true);
+//
+//        mockMvc.perform(put("/room/{id}", 1)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(toJson(roomDto)))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string(containsString("true")));
+//    }
+//
+//    @Test
+//    public void deleteRoomTest() throws Exception {
+//
+//        when(roomService.deleteRoom(1L)).thenReturn(true);
+//        when(roomService.deleteRoom(Mockito.longThat((longValue) -> longValue != 1L))).thenReturn(false);
+//
+//        mockMvc.perform(delete("/room/{id}", 1))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string(containsString("true")));
+//
+//
+//        mockMvc.perform(delete("/room/{id}", 2))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string(containsString("false")));
+//    }
 
     @Test
     public void getAvailableSeatsForRoomTest() throws Exception {

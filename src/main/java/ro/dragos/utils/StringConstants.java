@@ -8,4 +8,9 @@ public class StringConstants {
     public static final String ROOM_ID_USED = "This id is already used by another room.";
     public static final String ROOM_NULL = "Room was null";
     public static final String ROOM_ID_NOT_FOUND = "No room with this id was found.";
+    public static final String SEAT_ADD_OK = "The seat was successfully added.";
+    public static final String SEAT_NULL = "The seat was null";
+    public static final String SEAT_UPDATE_OK = "The seat was successfully updated.";
+    public static final String SEAT_DELETE_OK = "The seat was successfully removed.";
+    public static final String SEAT_ID_NOT_FOUND = "No seat with this id was found";
 }

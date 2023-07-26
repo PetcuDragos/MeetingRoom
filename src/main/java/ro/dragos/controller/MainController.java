@@ -51,5 +51,23 @@ public class MainController {
         return ResponseEntity.ok(this.roomService.getAvailableSeatsForRoom(roomId));
     }
 
+    @PostMapping(path = "/room/{id}/seats")
+    public ResponseEntity<String> addSeat(@PathVariable("id") Long roomId, @RequestBody SeatDto seatDto) {
+        this.roomService.addSeat(roomId, seatDto);
+        return ResponseEntity.ok(StringConstants.SEAT_ADD_OK);
+    }
+
+    @PutMapping(path = "/room/seats/{id}")
+    public ResponseEntity<String> updateSeat(@PathVariable("id") Long seatId, @RequestBody SeatDto seatDto) {
+        this.roomService.updateSeat(seatId, seatDto);
+        return ResponseEntity.ok(StringConstants.SEAT_UPDATE_OK);
+    }
+
+    @DeleteMapping(path = "/room/seats/{id}")
+    public ResponseEntity<String> deleteSeat(@PathVariable("id") Long seatId) {
+        this.roomService.deleteSeat(seatId);
+        return ResponseEntity.ok(StringConstants.SEAT_DELETE_OK);
+    }
+
 
 }

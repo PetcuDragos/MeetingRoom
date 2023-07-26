@@ -2,7 +2,7 @@ package ro.dragos.dto;
 
 public class SeatDto {
 
-    private final Long id;
+    private Long id;
     private final Boolean available;
 
     private final Long roomId;
@@ -23,5 +23,9 @@ public class SeatDto {
 
     public Long getRoomId() {
         return roomId;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
