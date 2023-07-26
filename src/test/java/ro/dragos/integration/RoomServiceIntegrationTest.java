@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
+import ro.dragos.dto.RoomDto;
 import ro.dragos.model.Room;
 import ro.dragos.service.RoomService;
 
@@ -27,7 +28,7 @@ public class RoomServiceIntegrationTest {
 
     @BeforeEach
     public void cleanUp() {
-        List<Room> rooms = new ArrayList<>(roomService.getRooms());
+        List<RoomDto> rooms = roomService.getRooms();
         rooms.forEach(room -> roomService.deleteRoom(room.getId()));
     }
 
@@ -35,7 +36,7 @@ public class RoomServiceIntegrationTest {
     @Test
     public void addRoom_ShouldBeInserted_WhenGivenCorrectValue() {
         int numberOfRoomsBefore = roomService.getRooms().size();
-        boolean roomWasAdded = roomService.addRoom(new Room(1L, "Room1", new ArrayList<>()));
+        boolean roomWasAdded = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
         Assert.isTrue(roomWasAdded,
                 "Room was not added");
         Assert.isTrue(roomService.getRooms().size() == numberOfRoomsBefore + 1,
@@ -46,18 +47,18 @@ public class RoomServiceIntegrationTest {
 
     @Test
     public void addRoom_ShouldNotBeInserted_WhenGivenAlreadyUsedId() {
-        boolean firstRoomWasAdded = roomService.addRoom(new Room(1L, "Room1", new ArrayList<>()));
+        boolean firstRoomWasAdded = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
         int numberOfRoomsBefore = roomService.getRooms().size();
         Assert.isTrue(firstRoomWasAdded,
                 "First room was not added");
 
-        boolean secondRoomWasAdded = roomService.addRoom(new Room(1L, "Room2", new ArrayList<>()));
+        boolean secondRoomWasAdded = roomService.addRoom(new RoomDto(1L, "Room2", new ArrayList<>()));
 
         Assert.isTrue(!secondRoomWasAdded,
                 "The second room was added with duplicated ID");
         Assert.isTrue(roomService.getRooms().size() == numberOfRoomsBefore,
                 "Size of roomList changed after add");
-        Optional<Room> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
+        Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
         Assert.isTrue(optionalRoom.isPresent() && optionalRoom.get().getName().equals("Room1"),
                 "The name of the room changed after failed add");
     }
@@ -74,16 +75,16 @@ public class RoomServiceIntegrationTest {
 
     @Test
     public void updateRoom_ShouldUpdateRoom_WhenGivenRoomWithExistingId() {
-        boolean roomWasAdded = roomService.addRoom(new Room(1L, "Room1", new ArrayList<>()));
+        boolean roomWasAdded = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
         Assert.isTrue(roomWasAdded, "Room was not inserted");
         int numberOfRooms = roomService.getRooms().size();
 
-        boolean roomWasUpdated = roomService.updateRoom(1L, new Room(1L, "Room2", new ArrayList<>()));
+        boolean roomWasUpdated = roomService.updateRoom(1L, new RoomDto(1L, "Room2", new ArrayList<>()));
 
         Assert.isTrue(roomWasUpdated, "Room update has returned false");
         Assert.isTrue(numberOfRooms == roomService.getRooms().size(), "The number of rooms has changed");
 
-        Optional<Room> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
+        Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
 
         Assert.isTrue(optionalRoom.isPresent(), "Room was not found with the inserted id");
         Assert.isTrue(optionalRoom.get().getName().equals("Room2"), "The room values were not updated");
@@ -93,12 +94,12 @@ public class RoomServiceIntegrationTest {
     public void updateRoom_ShouldNotUpdate_WhenGivenRoomWithNonExistingId() {
         int numberOfRooms = roomService.getRooms().size();
 
-        boolean roomWasUpdated = roomService.updateRoom(1L, new Room(1L, "Room1", new ArrayList<>()));
+        boolean roomWasUpdated = roomService.updateRoom(1L, new RoomDto(1L, "Room1", new ArrayList<>()));
 
         Assert.isTrue(!roomWasUpdated, "Room update returned true when it should've returned false");
         Assert.isTrue(numberOfRooms == roomService.getRooms().size(), "The number of rooms has changed");
 
-        Optional<Room> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
+        Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
 
         Assert.isTrue(optionalRoom.isEmpty(), "A room was found with the updated id");
     }
@@ -106,7 +107,7 @@ public class RoomServiceIntegrationTest {
     @Test
     public void updateRoom_ShouldThrowException_WhenGivenIdIsNull() {
         try {
-            roomService.updateRoom(null, new Room(1L, "Room1", new ArrayList<>()));
+            roomService.updateRoom(null, new RoomDto(1L, "Room1", new ArrayList<>()));
             assert false;
         } catch (Exception e) {
             Assert.isInstanceOf(IllegalArgumentException.class, e, "The type of exception is different.");
@@ -125,7 +126,7 @@ public class RoomServiceIntegrationTest {
 
     @Test
     public void deleteRoom_ShouldRemove_WhenGivenAnExistingRoom() {
-        boolean roomWasAdded = roomService.addRoom(new Room(1L, "Room1", new ArrayList<>()));
+        boolean roomWasAdded = roomService.addRoom(new RoomDto(1L, "Room1", new ArrayList<>()));
         Assert.isTrue(roomWasAdded, "Room was not inserted");
         int numberOfRooms = roomService.getRooms().size();
 
@@ -134,7 +135,7 @@ public class RoomServiceIntegrationTest {
         Assert.isTrue(numberOfRooms == roomService.getRooms().size() + 1,
                 "The number of rooms has not decreased by 1");
 
-        Optional<Room> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
+        Optional<RoomDto> optionalRoom = roomService.getRooms().stream().filter(room -> room.getId().equals(1L)).findAny();
 
         Assert.isTrue(optionalRoom.isEmpty(), "Found a room with an id equal to the one deleted");
     }

@@ -18,6 +18,6 @@ public class Room {
     private Long id;
     private String name;
 
-    @OneToMany(mappedBy = "room", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "room", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Seat> seats;
 }

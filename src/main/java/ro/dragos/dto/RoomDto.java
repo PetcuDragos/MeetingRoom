@@ -1,16 +1,14 @@
 package ro.dragos.dto;
 
-import ro.dragos.model.Seat;
-
 import java.util.List;
 
 public class RoomDto {
 
     private final Long id;
     private final String name;
-    private final List<Seat> seats;
+    private final List<SeatDto> seats;
 
-    public RoomDto(Long id, String name, List<Seat> seats) {
+    public RoomDto(Long id, String name, List<SeatDto> seats) {
         this.id = id;
         this.name = name;
         this.seats = seats;
@@ -24,7 +22,7 @@ public class RoomDto {
         return name;
     }
 
-    public List<Seat> getSeats() {
+    public List<SeatDto> getSeats() {
         return seats;
     }
 }

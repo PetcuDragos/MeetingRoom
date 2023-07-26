@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ro.dragos.dto.RoomDto;
+import ro.dragos.dto.SeatDto;
 import ro.dragos.model.Room;
 import ro.dragos.model.Seat;
 import ro.dragos.service.RoomService;
@@ -46,7 +47,7 @@ public class MainControllerTest {
     @Test
     public void getRoomsTest() throws Exception {
 
-        when(roomService.getRooms()).thenReturn(List.of(new Room(1L, "Room1", new ArrayList<>())));
+        when(roomService.getRooms()).thenReturn(List.of(new RoomDto(1L, "Room1", new ArrayList<>())));
 
         mockMvc.perform(get("/room"))
                 .andExpect(status().isOk())
@@ -59,7 +60,7 @@ public class MainControllerTest {
 
         RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
 
-        when(roomService.addRoom(Mockito.any(Room.class))).thenReturn(true);
+        when(roomService.addRoom(Mockito.any(RoomDto.class))).thenReturn(true);
 
         mockMvc.perform(post("/room")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -73,7 +74,7 @@ public class MainControllerTest {
 
         RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
 
-        when(roomService.updateRoom(Mockito.any(Long.class), Mockito.any(Room.class))).thenReturn(true);
+        when(roomService.updateRoom(Mockito.any(Long.class), Mockito.any(RoomDto.class))).thenReturn(true);
 
         mockMvc.perform(put("/room/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +103,7 @@ public class MainControllerTest {
     public void getAvailableSeatsForRoomTest() throws Exception {
 
         when(roomService.getAvailableSeatsForRoom(1L))
-                .thenReturn(List.of(new Seat(1L, true, null), new Seat(2L, true,null)));
+                .thenReturn(List.of(new SeatDto(1L, true, 1L), new SeatDto(2L, true,1L)));
 
         when(roomService.getAvailableSeatsForRoom(Mockito.longThat(longValue -> !longValue.equals(1L))))
                 .thenReturn(new ArrayList<>());

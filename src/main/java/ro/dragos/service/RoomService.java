@@ -1,6 +1,10 @@
 package ro.dragos.service;
 
 import org.springframework.stereotype.Service;
+import ro.dragos.dto.RoomDto;
+import ro.dragos.dto.SeatDto;
+import ro.dragos.mappers.RoomMapper;
+import ro.dragos.mappers.SeatMapper;
 import ro.dragos.model.Room;
 import ro.dragos.model.Seat;
 import ro.dragos.repository.RoomRepository;
@@ -15,20 +19,26 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final SeatRepository seatRepository;
+    private final SeatMapper seatMapper;
+    private final RoomMapper roomMapper;
 
-    public RoomService(RoomRepository roomRepository, SeatRepository seatRepository) {
+    public RoomService(RoomRepository roomRepository, SeatRepository seatRepository, SeatMapper seatMapper, RoomMapper roomMapper) {
         this.roomRepository = roomRepository;
         this.seatRepository = seatRepository;
+        this.seatMapper = seatMapper;
+        this.roomMapper = roomMapper;
     }
 
-    public List<Room> getRooms() {
-        return roomRepository.findAll();
+    public List<RoomDto> getRooms() {
+        return roomRepository.findAll().stream().map(roomMapper::toDto).toList();
     }
 
-    public boolean addRoom(Room room) {
-        if (room == null) {
+    public boolean addRoom(RoomDto roomDto) {
+        if (roomDto == null) {
             throw new IllegalArgumentException("Room was null");
         }
+
+        Room room = roomMapper.toEntity(roomDto);
 
         Optional<Room> roomWithSameId = roomRepository.findById(room.getId());
         if (roomWithSameId.isPresent()) {
@@ -37,41 +47,36 @@ public class RoomService {
 
         try {
             roomRepository.save(room);
-            room.getSeats().forEach(seatRepository::save);
             return true;
         } catch (Exception e) {
-            roomRepository.delete(room);
             room.getSeats().forEach(seatRepository::delete);
+            roomRepository.delete(room);
             throw e;
         }
     }
 
-    public boolean updateRoom(Long roomId, Room room) {
-        if (roomId == null || room == null) {
+    public boolean updateRoom(Long roomId, RoomDto roomDto) {
+        if (roomId == null || roomDto == null) {
             throw new IllegalArgumentException("RoomId or room were null");
         }
 
+        Room room = roomMapper.toEntity(roomDto);
+
         Optional<Room> roomBeforeUpdate = roomRepository.findById(roomId);
 
-        if (roomBeforeUpdate.isEmpty()) {
+        if (roomBeforeUpdate.isEmpty() || !roomId.equals(roomDto.getId())) {
             return false;
         }
 
         Room oldRoom = roomBeforeUpdate.get();
 
         try {
+            roomRepository.delete(oldRoom);
             roomRepository.save(room);
-            room.getSeats().forEach(seatRepository::save);
-            oldRoom.getSeats().stream()
-                    .filter(oldSeat -> room.getSeats().stream().noneMatch(seat -> seat.getId().equals(oldSeat.getId())))
-                    .forEach(seatRepository::delete);
             return true;
         } catch (Exception e) {
+            roomRepository.delete(room);
             roomRepository.save(oldRoom);
-            oldRoom.getSeats().forEach(seatRepository::save);
-            room.getSeats().stream()
-                    .filter(seat -> oldRoom.getSeats().stream().noneMatch(oldSeat -> oldSeat.getId().equals(seat.getId())))
-                    .forEach(seatRepository::delete);
             return false;
         }
     }
@@ -89,9 +94,10 @@ public class RoomService {
     }
 
 
-    public List<Seat> getAvailableSeatsForRoom(Long roomId) {
+    public List<SeatDto> getAvailableSeatsForRoom(Long roomId) {
         Optional<Room> roomFound = roomRepository.findById(roomId);
-        return roomFound.map(room -> room.getSeats().stream().filter(Seat::getAvailable).toList())
+        List<Seat> seats = roomFound.map(room -> room.getSeats().stream().filter(Seat::getAvailable).toList())
                 .orElseGet(ArrayList::new);
+        return seats.stream().map(seatMapper::toDto).toList();
     }
 }
