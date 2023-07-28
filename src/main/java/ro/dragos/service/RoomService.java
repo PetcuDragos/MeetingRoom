@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ro.dragos.dto.RoomDto;
 import ro.dragos.dto.SeatDto;
 import ro.dragos.exceptions.NotFoundException;
+import ro.dragos.exceptions.NullValueException;
 import ro.dragos.mappers.RoomMapper;
 import ro.dragos.mappers.SeatMapper;
 import ro.dragos.model.Room;
@@ -40,6 +41,10 @@ public class RoomService {
             throw new IllegalArgumentException(StringConstants.ROOM_NULL);
         }
 
+        if (roomDto.getName() == null) {
+            throw new NullValueException(StringConstants.ROOM_NAME_NULL);
+        }
+
         roomDto.setId(null);
         Room room = roomMapper.toEntity(roomDto);
 
@@ -49,6 +54,9 @@ public class RoomService {
     public Room updateRoom(Long roomId, RoomDto roomDto) {
         if (roomId == null || roomDto == null) {
             throw new IllegalArgumentException(StringConstants.ROOM_NULL);
+        }
+        if (roomDto.getName() == null) {
+            throw new NullValueException(StringConstants.ROOM_NAME_NULL);
         }
         roomDto.setId(roomId);
         Room room = roomMapper.toEntity(roomDto);
@@ -86,6 +94,10 @@ public class RoomService {
         if (roomId == null || seatDto == null) {
             throw new IllegalArgumentException(StringConstants.SEAT_NULL);
         }
+        if (seatDto.getAvailable()) {
+            throw new IllegalArgumentException(StringConstants.SEAT_AVAILABLE_NULL);
+        }
+
         Optional<Room> optionalRoom = roomRepository.findById(roomId);
 
         if (optionalRoom.isEmpty()) {
@@ -126,5 +138,9 @@ public class RoomService {
         }
 
         seatRepository.deleteById(seatId);
+    }
+
+    public List<SeatDto> getSeats() {
+        return seatRepository.findAll().stream().map(seatMapper::toDto).toList();
     }
 }

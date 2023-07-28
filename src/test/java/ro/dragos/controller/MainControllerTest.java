@@ -1,27 +1,24 @@
 package ro.dragos.controller;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ro.dragos.dto.RoomDto;
-import ro.dragos.dto.SeatDto;
+import org.springframework.util.Assert;
 import ro.dragos.model.Room;
 import ro.dragos.model.Seat;
-import ro.dragos.service.RoomService;
+import ro.dragos.repository.RoomRepository;
+import ro.dragos.repository.SeatRepository;
+import ro.dragos.utils.ApiUrlUtil;
 import ro.dragos.utils.StringConstants;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -30,12 +27,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class MainControllerTest {
 
     private final MockMvc mockMvc;
+    private final RoomRepository roomRepository;
+    private final SeatRepository seatRepository;
 
-    @MockBean
-    private RoomService roomService;
-
-    public MainControllerTest(@Autowired MockMvc mockMvc) {
+    @Autowired
+    public MainControllerTest(MockMvc mockMvc, RoomRepository roomRepository, SeatRepository seatRepository) {
         this.mockMvc = mockMvc;
+        this.roomRepository = roomRepository;
+        this.seatRepository = seatRepository;
+    }
+
+    @BeforeEach
+    public void cleanUp() {
+        roomRepository.deleteAll();
+        seatRepository.deleteAll();
     }
 
     @Test
@@ -48,7 +53,7 @@ public class MainControllerTest {
     @Test
     public void getRoomsTest() throws Exception {
 
-        when(roomService.getRooms()).thenReturn(List.of(new RoomDto(1L, "Room1", new ArrayList<>())));
+        roomRepository.save(new Room(null, "Room1", new ArrayList<>()));
 
         mockMvc.perform(get("/room"))
                 .andExpect(status().isOk())
@@ -56,75 +61,191 @@ public class MainControllerTest {
                 .andExpect(jsonPath("$[0].name", is("Room1")));
     }
 
-//    @Test
-//    public void addRoomTest() throws Exception {
-//
-//        RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
-//
-//        when(roomService.addRoom(Mockito.any(RoomDto.class))).thenReturn(true);
-//
-//        mockMvc.perform(post("/room")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(toJson(roomDto)))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string(containsString("true")));
-//    }
-//
-//    @Test
-//    public void updateRoomTest() throws Exception {
-//
-//        RoomDto roomDto = new RoomDto(1L, "Room1", new ArrayList<>());
-//
-//        when(roomService.updateRoom(Mockito.any(Long.class), Mockito.any(RoomDto.class))).thenReturn(true);
-//
-//        mockMvc.perform(put("/room/{id}", 1)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(toJson(roomDto)))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string(containsString("true")));
-//    }
-//
-//    @Test
-//    public void deleteRoomTest() throws Exception {
-//
-//        when(roomService.deleteRoom(1L)).thenReturn(true);
-//        when(roomService.deleteRoom(Mockito.longThat((longValue) -> longValue != 1L))).thenReturn(false);
-//
-//        mockMvc.perform(delete("/room/{id}", 1))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string(containsString("true")));
-//
-//
-//        mockMvc.perform(delete("/room/{id}", 2))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string(containsString("false")));
-//    }
-
     @Test
-    public void getAvailableSeatsForRoomTest() throws Exception {
+    public void getAvailableSeats_ShouldBeOk_WhenInsertingRoomAndSeatsSeparately() throws Exception {
 
-        when(roomService.getAvailableSeatsForRoom(1L))
-                .thenReturn(List.of(new SeatDto(1L, true, 1L), new SeatDto(2L, true,1L)));
+        Room room = roomRepository.save(new Room(null, "Room1", new ArrayList<>()));
+        seatRepository.save(new Seat(null, true, room));
+        seatRepository.save(new Seat(null, true, room));
+        seatRepository.save(new Seat(null, false, room));
 
-        when(roomService.getAvailableSeatsForRoom(Mockito.longThat(longValue -> !longValue.equals(1L))))
-                .thenReturn(new ArrayList<>());
-
-        mockMvc.perform(get("/room/{id}/seats/available", 1L))
+        mockMvc.perform(get("/room/{id}/seats/available", room.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].available", is(true)))
                 .andExpect(jsonPath("$[1].available", is(true)));
-
-        mockMvc.perform(get("/room/{id}/seats/available", 2L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
     }
 
-    public String toJson(Object object) {
-        try {
-            return new ObjectMapper().writeValueAsString(object);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    @Test
+    public void addRoom_ShouldBeInserted_WhenGivenValidValueWithoutSeats() throws Exception {
+
+        String requestBody = "{\"name\": \"Room1\"}";
+
+        long initialItemCount = roomRepository.count();
+
+        mockMvc.perform(post(ApiUrlUtil.ADD_ROOM)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().is2xxSuccessful());
+
+        long newItemCount = roomRepository.count();
+
+        Room room = roomRepository.findAll().stream().filter(r -> r.getName().equals("Room1")).findAny().orElse(null);
+
+        Assert.isTrue(initialItemCount + 1 == newItemCount, "Size of roomList not changed properly after add");
+        Assert.notNull(room, "Added room was not found");
+        Assert.isTrue(0 == room.getSeats().size(), "Added room with no seats has seats inserted.");
+    }
+
+    @Test
+    public void addRoom_ShouldBeInserted_WhenGivenValidValueWithSeats() throws Exception {
+
+        String requestBody = "{\"name\": \"Room1\", \"seats\": [{\"available\" : true}, {\"available\" : false}]}";
+
+        long initialItemCount = roomRepository.count();
+
+        mockMvc.perform(post(ApiUrlUtil.ADD_ROOM)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().is2xxSuccessful());
+
+        long newItemCount = roomRepository.count();
+
+        Room room = roomRepository.findAll().stream().filter(r -> r.getName().equals("Room1")).findAny().orElse(null);
+
+        Assert.isTrue(initialItemCount + 1 == newItemCount, "Size of roomList not changed properly after add");
+        Assert.notNull(room, "Added room was not found");
+        Assert.isTrue(2 == room.getSeats().size(), "Added room with no seats has seats inserted.");
+        Assert.isTrue(1 == room.getSeats().stream().filter(Seat::getAvailable).count(),
+                "Should be one seat available, but found different number.");
+        Assert.isTrue(1 == room.getSeats().stream().filter(s -> !s.getAvailable()).count(),
+                "Should be one seat not available, but found different number.");
+    }
+
+    @Test
+    public void addRoom_ShouldThrowException_WhenGivenNullName() throws Exception {
+
+        String requestBody = "{}";
+
+        long initialItemCount = roomRepository.count();
+
+        mockMvc.perform(post(ApiUrlUtil.ADD_ROOM)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString(StringConstants.ROOM_NAME_NULL)));
+
+        long newItemCount = roomRepository.count();
+
+        Assert.isTrue(initialItemCount == newItemCount, "Size of roomList changed properly after incorrect add");
+    }
+
+    @Test
+    public void updateRoom_ShouldUpdateRoomName_WhenGivenRoomWithExistingIdAndDifferentName() throws Exception {
+
+        String requestBody = "{\"name\":\"Room2\"}";
+
+        Room room = roomRepository.save(new Room(null, "Room1", null));
+
+        long initialItemCount = roomRepository.count();
+
+        mockMvc.perform(put(ApiUrlUtil.UPDATE_ROOM, room.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk());
+
+        long newItemCount = roomRepository.count();
+
+        Room updatedRoom = roomRepository.findById(room.getId()).orElse(null);
+
+        Assert.isTrue(initialItemCount == newItemCount, "Size of roomList has changed after update");
+        Assert.notNull(updatedRoom, "Updated room was not found");
+        Assert.isTrue(0 == updatedRoom.getSeats().size(), "Added room with no seats has seats inserted.");
+        Assert.isTrue(updatedRoom.getName().equals("Room2"), "The room name was not updated");
+    }
+
+    @Test
+    public void updateRoom_ShouldThrowException_WhenGivenRoomWithExistingIdAndNullName() throws Exception {
+
+        String requestBody = "{}";
+
+        Room room = roomRepository.save(new Room(null, "Room1", null));
+
+        long initialItemCount = roomRepository.count();
+
+        mockMvc.perform(put(ApiUrlUtil.UPDATE_ROOM, room.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString(StringConstants.ROOM_NAME_NULL)));
+
+        long newItemCount = roomRepository.count();
+
+        Room updatedRoom = roomRepository.findById(room.getId()).orElse(null);
+
+        Assert.isTrue(initialItemCount == newItemCount, "Size of roomList has changed after update");
+        Assert.notNull(updatedRoom, "Updated room was not found");
+        Assert.isTrue(0 == updatedRoom.getSeats().size(), "Added room with no seats has seats inserted.");
+        Assert.isTrue(updatedRoom.getName().equals("Room1"), "The room name was updated when it shouldn't.");
+    }
+
+    @Test
+    public void updateRoom_ShouldThrowException_WhenGivenRoomWithNonExistingId() throws Exception {
+
+        String requestBody = "{\"name\":\"Room2\"}";
+
+        Room room = roomRepository.save(new Room(null, "Room1", null));
+
+        long initialItemCount = roomRepository.count();
+        long newId = room.getId() + 1;
+
+        mockMvc.perform(put(ApiUrlUtil.UPDATE_ROOM, newId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString(StringConstants.ROOM_ID_NOT_FOUND)));
+
+        long newItemCount = roomRepository.count();
+
+        Room updatedRoom = roomRepository.findById(newId).orElse(null);
+
+        Assert.isTrue(initialItemCount == newItemCount, "Size of roomList has changed after update");
+        Assert.isNull(updatedRoom, "A room was found with the updated id");
+    }
+
+
+    @Test
+    public void deleteRoom_ShouldRemove_WhenGivenAnExistingRoomId() throws Exception {
+
+        Room room = roomRepository.save(new Room(null, "Room1", null));
+
+        long initialItemCount = roomRepository.count();
+
+        mockMvc.perform(delete(ApiUrlUtil.DELETE_ROOM, room.getId()))
+                .andExpect(status().isOk());
+
+        long newItemCount = roomRepository.count();
+
+        Room updatedRoom = roomRepository.findById(room.getId()).orElse(null);
+
+        Assert.isTrue(initialItemCount - 1 == newItemCount, "Size of roomList is not as expected");
+        Assert.isNull(updatedRoom, "A room was found with the deleted id");
+    }
+
+    @Test
+    public void deleteRoom_ShouldThrowException_WhenGivenAnIdFromANonExistingRoom() throws Exception {
+
+        Room room = roomRepository.save(new Room(null, "Room1", null));
+
+        long initialItemCount = roomRepository.count();
+        long newId = room.getId() + 1;
+
+        mockMvc.perform(delete(ApiUrlUtil.DELETE_ROOM, newId))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString(StringConstants.ROOM_ID_NOT_FOUND)));
+
+        long newItemCount = roomRepository.count();
+
+        Assert.isTrue(initialItemCount == newItemCount, "Size of roomList is not as expected");
     }
 }

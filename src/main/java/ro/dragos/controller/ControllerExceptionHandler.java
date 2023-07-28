@@ -9,6 +9,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import ro.dragos.exceptions.IdUsedException;
 import ro.dragos.exceptions.NotFoundException;
+import ro.dragos.exceptions.NullValueException;
 
 @ControllerAdvice
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
@@ -18,7 +19,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
-    @ExceptionHandler({IdUsedException.class, NotFoundException.class})
+    @ExceptionHandler({IdUsedException.class, NotFoundException.class, NullValueException.class})
     public ResponseEntity<Object> handleErrors(RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT, request);
     }

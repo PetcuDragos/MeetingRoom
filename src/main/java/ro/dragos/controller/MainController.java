@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ro.dragos.dto.RoomDto;
 import ro.dragos.dto.SeatDto;
 import ro.dragos.service.RoomService;
+import ro.dragos.utils.ApiUrlUtil;
 import ro.dragos.utils.StringConstants;
 
 import java.util.List;
@@ -18,56 +19,59 @@ public class MainController {
         this.roomService = roomService;
     }
 
-    @GetMapping(path = "/start")
+    @GetMapping(ApiUrlUtil.GET_HELLO_MESSAGE)
     public ResponseEntity<String> getHelloMessage() {
         return ResponseEntity.ok(StringConstants.HELLO_MESSAGE);
     }
 
-    @GetMapping("/room")
+    @GetMapping(ApiUrlUtil.GET_ROOMS)
     public ResponseEntity<List<RoomDto>> getRooms() {
         return ResponseEntity.ok(this.roomService.getRooms());
     }
 
-    @PostMapping(path = "/room")
+    @PostMapping(ApiUrlUtil.ADD_ROOM)
     public ResponseEntity<String> addRoom(@RequestBody RoomDto roomDto) {
         this.roomService.addRoom(roomDto);
         return ResponseEntity.ok(StringConstants.ROOM_ADD_OK);
     }
 
-    @PutMapping(path = "/room/{id}")
+    @PutMapping(ApiUrlUtil.UPDATE_ROOM)
     public ResponseEntity<String> updateRoom(@PathVariable("id") Long roomId, @RequestBody RoomDto roomDto) {
         this.roomService.updateRoom(roomId, roomDto);
         return ResponseEntity.ok(StringConstants.ROOM_UPDATE_OK);
     }
 
-    @DeleteMapping(path = "/room/{id}")
+    @DeleteMapping(ApiUrlUtil.DELETE_ROOM)
     public ResponseEntity<String> deleteRoom(@PathVariable("id") Long roomId) {
         this.roomService.deleteRoom(roomId);
         return ResponseEntity.ok(StringConstants.ROOM_DELETE_OK);
     }
 
-    @GetMapping(path = "/room/{id}/seats/available")
+    @GetMapping(ApiUrlUtil.GET_AVAILABLE_SEATS)
     public ResponseEntity<List<SeatDto>> getAvailableSeatsForRoom(@PathVariable("id") Long roomId) {
         return ResponseEntity.ok(this.roomService.getAvailableSeatsForRoom(roomId));
     }
 
-    @PostMapping(path = "/room/{id}/seats")
+    @PostMapping(ApiUrlUtil.ADD_SEAT)
     public ResponseEntity<String> addSeat(@PathVariable("id") Long roomId, @RequestBody SeatDto seatDto) {
         this.roomService.addSeat(roomId, seatDto);
         return ResponseEntity.ok(StringConstants.SEAT_ADD_OK);
     }
 
-    @PutMapping(path = "/room/seats/{id}")
+    @PutMapping(ApiUrlUtil.UPDATE_SEAT)
     public ResponseEntity<String> updateSeat(@PathVariable("id") Long seatId, @RequestBody SeatDto seatDto) {
         this.roomService.updateSeat(seatId, seatDto);
         return ResponseEntity.ok(StringConstants.SEAT_UPDATE_OK);
     }
 
-    @DeleteMapping(path = "/room/seats/{id}")
+    @DeleteMapping(ApiUrlUtil.DELETE_SEAT)
     public ResponseEntity<String> deleteSeat(@PathVariable("id") Long seatId) {
         this.roomService.deleteSeat(seatId);
         return ResponseEntity.ok(StringConstants.SEAT_DELETE_OK);
     }
 
-
+    @GetMapping(ApiUrlUtil.GET_SEATS)
+    public ResponseEntity<List<SeatDto>> getAllSeats() {
+        return ResponseEntity.ok(this.roomService.getSeats());
+    }
 }
