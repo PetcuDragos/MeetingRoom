@@ -9,7 +9,7 @@ import ro.dragos.utils.ApiUrlUtil;
 import ro.dragos.utils.StringConstants;
 
 import java.util.List;
-
+@CrossOrigin(origins = "https://editor.swagger.io/", maxAge = 3600)
 @RestController
 public class MainController {
 

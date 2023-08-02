@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: MeetingRoom APIs
+  description: An Interface for the APIs that we use
+  version: 1.0.11
+servers:
+  - url: http://localhost:8080
+paths:
+  /room:
+    post:
+      tags:
+        - Room
+      summary: Add a new room
+      description: Adds a new room
+      operationId: addRoom
+      requestBody:
+        description: Create a new room
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Room'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '405':
+          description: Invalid input
+    get:
+      tags:
+        - Room
+      summary: Returns all the rooms
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findAllRooms
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Room'          
+        '400':
+          description: Invalid status value
+components:
+  schemas:
+    Room:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: Room1
+        seats:
+          type: array
+          items:
+            $ref: '#/components/schemas/Seat'
+    Seat:
+      required:
+        - available
+      type: object
+      properties:
+        available:
+          type: boolean
+          example: true
